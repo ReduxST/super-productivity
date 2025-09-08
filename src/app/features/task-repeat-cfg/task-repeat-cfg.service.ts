@@ -4,6 +4,7 @@ import {
   addTaskRepeatCfgToTask,
   deleteTaskRepeatCfg,
   deleteTaskRepeatCfgs,
+  deleteTaskRepeatCfgInstance,
   updateTaskRepeatCfg,
   updateTaskRepeatCfgs,
   upsertTaskRepeatCfg,
@@ -99,6 +100,10 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(deleteTaskRepeatCfgs({ ids }));
   }
 
+  deleteTaskRepeatCfgInstance(repeatCfgId: string, dateStr: string): void {
+    this._store$.dispatch(deleteTaskRepeatCfgInstance({ repeatCfgId, dateStr }));
+  }
+
   updateTaskRepeatCfg(
     id: string,
     changes: Partial<TaskRepeatCfg>,
@@ -172,6 +177,12 @@ export class TaskRepeatCfgService {
 
     if (!taskRepeatCfg.id) {
       throw new Error('No taskRepeatCfg.id');
+    }
+
+    // Check if this date is in the deleted instances list
+    const targetDateStr = getDbDateStr(new Date(targetDayDate));
+    if (taskRepeatCfg.deletedInstanceDates?.includes(targetDateStr)) {
+      return []; // Skip creation for deleted instances
     }
 
     const isCreateNew =

@@ -1367,6 +1367,10 @@
         "HELP4": "A note about the order field: Referring to the creation order repeatable tasks. Only in effect for repeatable tasks that are created at the same time. A lower value means a task will be higher up the list, a higher number that it will be further down. A value greater than 0 means items are created at the bottom of normal tasks.",
         "TAG_LABEL": "Tags to add"
       },
+      "D_DELETE_INSTANCE": {
+        "MSG": "Remove the repeat task instance on {{date}}? This will prevent the task from being created on this date only.",
+        "OK": "Remove Instance"
+      },
       "F": {
         "C_DAY": "Day",
         "C_MONTH": "Month",
@@ -1400,7 +1404,8 @@
         "TUESDAY": "Tuesday",
         "WEDNESDAY": "Wednesday",
         "INHERIT_SUBTASKS": "Inherit subtasks",
-        "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the repeating task"
+        "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the repeating task",
+        "REMOVE_INSTANCE": "Remove today"
       }
     },
     "TASK_VIEW": {

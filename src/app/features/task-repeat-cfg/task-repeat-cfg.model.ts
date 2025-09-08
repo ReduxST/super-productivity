@@ -58,6 +58,9 @@ export interface TaskRepeatCfgCopy {
     timeEstimate?: number;
     notes?: string;
   }[];
+  
+  // Exception list for deleted instances
+  deletedInstanceDates?: string[]; // Array of ISO date strings (YYYY-MM-DD)
 }
 
 export type TaskRepeatCfg = Readonly<TaskRepeatCfgCopy>;

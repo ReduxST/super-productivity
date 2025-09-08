@@ -84,10 +84,16 @@ export const selectTaskRepeatCfgsForExactDay = createSelector(
   ): TaskRepeatCfg[] => {
     const dateToCheckTimestamp = dayDate;
     const dateToCheckDate = new Date(dateToCheckTimestamp);
+    const dateStr = getDbDateStr(dateToCheckTimestamp);
 
     return (
       taskRepeatCfgs &&
       taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
+        // Check if this date is in the deleted instances list
+        if (taskRepeatCfg.deletedInstanceDates?.includes(dateStr)) {
+          return false;
+        }
+
         const effectiveLastDay = getEffectiveLastTaskCreationDay(taskRepeatCfg);
         if (
           effectiveLastDay === getDbDateStr(dateToCheckTimestamp) ||
@@ -113,10 +119,16 @@ export const selectAllUnprocessedTaskRepeatCfgs = createSelector(
   ): TaskRepeatCfg[] => {
     const dateToCheckTimestamp = dayDate;
     const dateToCheckDate = new Date(dateToCheckTimestamp);
+    const dateStr = getDbDateStr(dateToCheckTimestamp);
 
     return (
       taskRepeatCfgs &&
       taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
+        // Check if this date is in the deleted instances list
+        if (taskRepeatCfg.deletedInstanceDates?.includes(dateStr)) {
+          return false;
+        }
+
         const effectiveLastDay = getEffectiveLastTaskCreationDay(taskRepeatCfg);
         if (
           effectiveLastDay === getDbDateStr(dateToCheckTimestamp) ||

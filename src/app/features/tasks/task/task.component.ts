@@ -345,10 +345,14 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   editTaskRepeatCfg(): void {
+    const task = this.task();
+    const targetDate = task.dueDay || getDbDateStr(new Date(task.created));
+    
     this._matDialog
       .open(DialogEditTaskRepeatCfgComponent, {
         data: {
-          task: this.task(),
+          task,
+          targetDate,
         },
       })
       .afterClosed()

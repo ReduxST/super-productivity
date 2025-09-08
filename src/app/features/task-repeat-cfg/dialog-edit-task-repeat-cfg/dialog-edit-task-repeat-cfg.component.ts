@@ -10,6 +10,7 @@ import {
 import { Task, TaskReminderOptionId } from '../../tasks/task.model';
 import {
   MAT_DIALOG_DATA,
+  MatDialog,
   MatDialogActions,
   MatDialogContent,
   MatDialogRef,
@@ -42,6 +43,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { Log } from '../../../core/log';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -66,11 +68,13 @@ export class DialogEditTaskRepeatCfgComponent {
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _matDialogRef =
     inject<MatDialogRef<DialogEditTaskRepeatCfgComponent>>(MatDialogRef);
+  private _matDialog = inject(MatDialog);
   private _translateService = inject(TranslateService);
   private _locale = inject(LOCALE_ID);
   private _data = inject<{
     task?: Task;
     repeatCfg?: TaskRepeatCfg;
+    targetDate?: string; // The specific date context for deletion
   }>(MAT_DIALOG_DATA);
 
   T: typeof T = T;
@@ -84,6 +88,8 @@ export class DialogEditTaskRepeatCfgComponent {
     if (this._data.task?.repeatCfgId) return true;
     return false;
   });
+
+  canRemoveInstance = signal<boolean>(false);
 
   TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS = signal<FormlyFieldConfig[]>([]);
   TASK_REPEAT_CFG_ADVANCED_FORM_CFG = signal<FormlyFieldConfig[]>(
@@ -106,7 +112,10 @@ export class DialogEditTaskRepeatCfgComponent {
           .pipe(first())
           .subscribe((cfg) => {
             this._setRepeatCfgInitiallyForEditOnly(cfg);
+            this._checkCanRemoveInstance();
           });
+      } else {
+        this._checkCanRemoveInstance();
       }
     });
   }
@@ -257,6 +266,41 @@ export class DialogEditTaskRepeatCfgComponent {
     this.close();
   }
 
+  deleteInstance(): void {
+    if (!this._data.targetDate || !this.canRemoveInstance()) {
+      return;
+    }
+    
+    const currentRepeatCfg = this.repeatCfg() as TaskRepeatCfg;
+    const targetDate = this._data.targetDate;
+    
+    // Show confirmation dialog
+    this._matDialog
+      .open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          message: this._translateService.instant(
+            'F.TASK_REPEAT.D_DELETE_INSTANCE.MSG',
+            { date: new Date(targetDate).toLocaleDateString(this._locale) }
+          ),
+          okTxt: this._translateService.instant('F.TASK_REPEAT.D_DELETE_INSTANCE.OK'),
+        },
+      })
+      .afterClosed()
+      .subscribe((isConfirm: boolean) => {
+        if (isConfirm) {
+          this._taskRepeatCfgService.deleteTaskRepeatCfgInstance(
+            exists(currentRepeatCfg.id),
+            targetDate,
+          );
+          
+          // TODO: Delete existing task instance for this date if it exists
+          
+          this.close();
+        }
+      });
+  }
+
   close(): void {
     this._matDialogRef.close();
   }
@@ -287,6 +331,19 @@ export class DialogEditTaskRepeatCfgComponent {
     const processedCfg = this._processQuickSettingForDate(repeatCfg);
     this.repeatCfg.set(processedCfg);
     this.repeatCfgInitial.set({ ...repeatCfg });
+  }
+
+  private _checkCanRemoveInstance(): void {
+    if (!this._data.targetDate) {
+      this.canRemoveInstance.set(false);
+      return;
+    }
+
+    // Don't allow removal for today or past dates, this logic is for scheduled repeated tasks, not existing tasks.
+    const todayStr = getDbDateStr(new Date());
+    const isTargetTodayOrPast = this._data.targetDate <= todayStr;
+    
+    this.canRemoveInstance.set(!isTargetTodayOrPast);
   }
 
   private _processQuickSettingForDate<

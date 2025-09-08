@@ -436,10 +436,14 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   editTaskRepeatCfg(): void {
+    const task = this.task();
+    const targetDate = task.dueDay || getDbDateStr(new Date(task.created));
+    
     this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
       restoreFocus: true,
       data: {
-        task: this.task(),
+        task,
+        targetDate,
       },
     });
   }

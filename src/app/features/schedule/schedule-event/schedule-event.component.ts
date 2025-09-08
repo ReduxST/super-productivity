@@ -39,6 +39,7 @@ import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-con
 import { BehaviorSubject, of } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 @Component({
   selector: 'schedule-event',
@@ -212,9 +213,13 @@ export class ScheduleEventComponent implements OnInit {
       this.se.type === SVEType.ScheduledRepeatProjection
     ) {
       const repeatCfg: TaskRepeatCfg = this.se.data as TaskRepeatCfg;
+      // Extract date from the SVE ID (format: repeatCfgId_YYYY-MM-DD)
+      const targetDate = this.se.id.split('_')[1];
+      
       this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
         data: {
           repeatCfg,
+          targetDate,
         },
       });
     } else if (this.se.type === SVEType.CalendarEvent) {

@@ -20,6 +20,7 @@ export class PlannerRepeatProjectionComponent {
 
   repeatCfg = input.required<TaskRepeatCfg>();
   overWriteTimeEstimate = input(0);
+  dayDate = input<string>(); // Optional day context for deletion
 
   T = T;
 
@@ -28,6 +29,7 @@ export class PlannerRepeatProjectionComponent {
       restoreFocus: false,
       data: {
         repeatCfg: this.repeatCfg(),
+        targetDate: this.dayDate(),
       },
     });
   }
